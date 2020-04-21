@@ -21,14 +21,8 @@ jobs:
         os: [linux, osx]
     runs-on: ubuntu-latest
     steps:
-    - name: context (DEBUG)
-      run: |
-        set
-        hostname
-        ifconfig
-        pwd
-    
-    # https://github.com/neuropoly/ANTs, which has had its build reduced to only output 4 programs.
+
+    # upstream: https://github.com/neuropoly/ANTs, which has had its build reduced to only output 4 programs.
     - name: get spinalcordtoolbox-ants
       run: |
         # TODO: this is currently at kousu/ANTs; get it moved to neuropoly/ANTs
@@ -43,9 +37,8 @@ jobs:
         curl -L "$URL" -o spinalcordtoolbox-ants.tar.gz
         mkdir -p spinalcordtoolbox-ants && tar -zxvf spinalcordtoolbox-ants.tar.gz -C spinalcordtoolbox-ants
         mkdir -p pkg && cp -rp spinalcordtoolbox-ants/sct-apps/* pkg/
-        find . # DEBUG
 
-    # https://github.com/neuropoly/spinalcordtoolbox/blob/master/dev/{isct_propseg,isct_dice_coefficient}
+    # upstream: https://github.com/neuropoly/spinalcordtoolbox/blob/master/dev/{isct_propseg,isct_dice_coefficient}
     - name: get spinalcordtoolbox-dev
       run: |
         # TODO: get this building, then building in CI, and use the release from there.
@@ -62,8 +55,8 @@ jobs:
         mkdir -p pkg
         mkdir -p spinalcordtoolbox-dev && tar -zxvf spinalcordtoolbox-dev.tar.gz -C spinalcordtoolbox-dev
         cp -rp spinalcordtoolbox-dev/* pkg/
-        find . # DEBUG
         
+    # upstream: https://www.creatis.insa-lyon.fr/site7/en/ctrDetect
     - name: get ctrDetect
       run: |
         echo "test test trying to build for ${{ matrix.os }}"
@@ -83,21 +76,18 @@ jobs:
         mkdir -p pkg/copyright
         cp -p ctrDetect/LICENSE.txt pkg/copyright/LICENSE_ctrDetect.txt
         cp -p ctrDetect/LICENSE_opencv.txt pkg/copyright/
-        find . # DEBUG
         
     - name: "'isct_' prefix"
       run: |
         # TODO: there's gotta be a shorter way to do this
-        # add the isct_ to files that don't already have it
+        # add the isct_ to programs that don't already have it
         cd pkg
-        find . -type f ! -name 'isct_*' -printf "%P\n" | while read fname; do echo mv "$fname" isct_"$fname"; done
-        find . # DEBUG
+        find ./ -type f -executable ! -name "isct_*" | while read fname; do  mv "$fname" $(dirname "$fname")/isct_$(basename "$fname"); done
     
     - name: package
       run: |
         # Github Artifacts only make .zips, so make a .tar.gz manually to preserve permissions/dates/etc
         tar -zcvf spinalcordtoolbox-binaries_${{ matrix.os }}.tar.gz -C pkg ./
-        find . # DEBUG
     
     - name: upload result
       uses: actions/upload-artifact@v2-preview
