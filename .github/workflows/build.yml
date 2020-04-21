@@ -19,13 +19,22 @@ jobs:
         os: [linux, osx]
     runs-on: ubuntu-latest
     steps:
+    - name: context (DEBUG)
+      run: |
+        set
+        hostname
+        ifconfig
+        pwd
     - name: get spinalcordtoolbox-ants
       run: |
-        case ${{ matrix.os }}; in
+        echo "test test trying to build for ${{ matrix.os }}"
+        case "${{ matrix.os }}" in
           linux)
             URL=https://github.com/kousu/ANTs/releases/download/refs%2Fpull%2F5%2Fmerge-82250525/sct-apps_centos7.tar.gz
+            ;;
           osx)
             URL=https://github.com/kousu/ANTs/releases/download/refs%2Fpull%2F5%2Fmerge-82250525/sct-apps_macos-latest.tar.gz
+            ;;
          esac
         curl -JLO "$URL" -o spinalcordtoolbox-ants.tar.gz
         mkdir -p pkg
