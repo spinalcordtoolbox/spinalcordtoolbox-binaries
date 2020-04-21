@@ -95,3 +95,49 @@ jobs:
       with:
         name: spinalcordtoolbox-binaries_${{ matrix.os }}
         path: spinalcordtoolbox-binaries_${{ matrix.os }}.tar.gz
+
+  release:
+    needs: [build]
+    runs-on: ubuntu-latest
+    #if: github.event_name == 'push' && github.branch_name == 'master' # only do a release on master
+    steps:          
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # name the release with the run_id to allow multiple builds on the same branch/tag
+          # https://github.com/actions/create-release/issues/2#issuecomment-613591846
+          tag_name: ${{ github.ref }}-${{github.run_id }}
+          release_name: Release ${{ github.sha }}
+          draft: false
+          prerelease: true
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: spinalcordtoolbox-binaries_linux
+          
+      - uses: actions/download-artifact@v1
+        with:
+          name: spinalcordtoolbox-binaries_osx
+      
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./spinalcordtoolbox-binaries_linux/spinalcordtoolbox-binaries_linux.tar.gz
+          asset_name: spinalcordtoolbox-binaries_linux.tar.gz
+          asset_content_type: application/gzip
+          
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./spinalcordtoolbox-binaries_osx/spinalcordtoolbox-binaries_osx.tar.gz
+          asset_name: spinalcordtoolbox-binaries_osx.tar.gz
+          asset_content_type: application/gzip
