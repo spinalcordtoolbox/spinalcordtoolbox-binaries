@@ -41,61 +41,7 @@ jobs:
             ;;
          esac
         curl -L "$URL" -o spinalcordtoolbox-ants.tar.gz
-        mkdir -p pkg
-        tar -zxvf spinalcordtoolbox-ants.tar.gz -C pkg
-        find . # DEBUG
-        
-    # https://github.com/neuropoly/spinalcordtoolbox/blob/master/dev/{isct_propseg,isct_dice_coefficient}
-    - name: get spinalcordtoolbox-dev
-      run: |
-        # TODO: get this building, then building in CI, and use the release from there.
-        # These OSF URLs contain a version that hasn't been recompiled since 2016.
-        case "${{ matrix.os }}" in
-          linux)
-            URL="https://osf.io/xspq2/?action=download"
-            ;;
-          osx)
-            URL="https://osf.io/vph5x/?action=download"
-            ;;
-         esac
-        curl -L "$URL" -o spinalcordtoolbox-dev.tar.gz
-        mkdir -p pkg
-        tar -zxvf spinalcordtoolbox-dev.tar.gz -C pkg
-        find . # DEBUG
-        
-    - name: get ctrDetect
-      run: |
-        echo "test test trying to build for ${{ matrix.os }}"
-        case "${{ matrix.os }}" in
-          linux)
-            URL="http://www.creatis.insa-lyon.fr/~sdika/soft/ctrDetect-v1_x86_64.tar.gz"
-            ;;
-          osx)
-            URL="http://www.creatis.insa-lyon.fr/~sdika/soft/ctrDetect-v1_macos10.11.tar.gz"
-            ;;
-         esac
-        curl -L "$URL" -o ctrDetect.tar.gz
-        mkdir -p pkg
-        tar -zxvf ctrDetect.tar.gz -C pkg --strip-components=1 # contents are contained under ctrDetect/, so strip that
+        mkdir -p spinalcordtoolbox-ants && tar -zxvf spinalcordtoolbox-ants.tar.gz -C spinalcordtoolbox-ants
+        mkdir -p pkg && cp -rp spinalcordtoolbox-ants/* pkg/
         find . # DEBUG
     
-    - name: "isct_" prefix
-      run: |
-        # TODO: there's gotta be a shorter way to do this
-        cd pkg
-        find . -type f ! -name 'isct_*' -printf "%P\n" | while read fname; do echo mv "$fname" isct_"$fname"; done
-        find . # DEBUG
-    
-    - name: package
-      run: |
-        # Github Artifacts only make .zips, so make a .tar.gz manually to preserve permissions/dates/etc
-        tar -zcvf spinalcordtoolbox-binaries_${{ matrix.os }}.tar.gz -C pkg ./
-        find . # DEBUG
-    
-    - name: upload result
-      uses: actions/upload-artifact@v2-preview
-      with:
-        name: spinalcordtoolbox-binaries_${{ matrix.os }}
-        path: spinalcordtoolbox-binaries_${{ matrix.os }}.tar.gz
-
-
