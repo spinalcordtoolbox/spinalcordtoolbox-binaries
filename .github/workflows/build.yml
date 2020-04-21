@@ -1,0 +1,33 @@
+name: build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    
+# all this does is collect three dependencies,
+# - spinalcordtoolbox-ants which essentially a more minimal fork of https://github.com/ANTsX/ANTs
+# - spinalcordtoolbox-dev, which comes from https://github.com/neuropoly/spinalcordtoolbox/blob/master/dev
+# - ctrDetect, from https://www.creatis.insa-lyon.fr/site7/en/ctrDetect
+# and squish them together in a single file.
+# while making sure they all have the prefix "isct_" on them.
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [linux, osx]
+    runs-on: ubuntu-latest
+    steps:
+    - name: get spinalcordtoolbox-ants
+      run: |
+        case ${{ matrix.os }}; in
+          linux)
+            URL=https://github.com/kousu/ANTs/releases/download/refs%2Fpull%2F5%2Fmerge-82250525/sct-apps_centos7.tar.gz
+          osx)
+            URL=https://github.com/kousu/ANTs/releases/download/refs%2Fpull%2F5%2Fmerge-82250525/sct-apps_macos-latest.tar.gz
+         esac
+        curl -JLO "$URL" -o spinalcordtoolbox-ants.tar.gz
+        mkdir -p pkg
+        tar -zxvf spinalcordtoolbox-ants.tar.gz -C pkg
+        find . # DEBUG
