@@ -62,4 +62,4 @@ jobs:
       uses: actions/upload-artifact@v2-preview
       with:
         name: spinalcordtoolbox-binaries_${{ matrix.os }}
-        path: spinalcordtoolbox-binaries_${{ matrix.os }}.tar.g
+        path: spinalcordtoolbox-binaries_${{ matrix.os }}.tar.gz
