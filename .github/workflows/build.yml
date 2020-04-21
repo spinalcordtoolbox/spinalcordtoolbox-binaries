@@ -1,0 +1,143 @@
+name: build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    
+# all this does is collect three dependencies,
+# - spinalcordtoolbox-ants which essentially a more minimal fork of https://github.com/ANTsX/ANTs
+# - spinalcordtoolbox-dev, which comes from https://github.com/neuropoly/spinalcordtoolbox/blob/master/dev
+# - ctrDetect, from https://www.creatis.insa-lyon.fr/site7/en/ctrDetect
+# and squish them together in a single file.
+# while making sure they all have the prefix "isct_" on them.
+# TODO: include some checksums; the ctrDetect upstream doesn't even use TLS.
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [linux, osx]
+    runs-on: ubuntu-latest
+    steps:
+
+    # upstream: https://github.com/neuropoly/ANTs, which has had its build reduced to only output 4 programs.
+    - name: get spinalcordtoolbox-ants
+      run: |
+        # TODO: this is currently at kousu/ANTs; get it moved to neuropoly/ANTs
+        case "${{ matrix.os }}" in
+          linux)
+            URL="https://github.com/kousu/ANTs/releases/download/refs%2Fpull%2F5%2Fmerge-82250525/sct-apps_centos7.tar.gz"
+            ;;
+          osx)
+            URL="https://github.com/kousu/ANTs/releases/download/refs%2Fpull%2F5%2Fmerge-82250525/sct-apps_macos-latest.tar.gz"
+            ;;
+         esac
+        curl -L "$URL" -o spinalcordtoolbox-ants.tar.gz
+        mkdir -p spinalcordtoolbox-ants && tar -zxvf spinalcordtoolbox-ants.tar.gz -C spinalcordtoolbox-ants
+        mkdir -p pkg && cp -rp spinalcordtoolbox-ants/sct-apps/* pkg/
+
+    # upstream: https://github.com/neuropoly/spinalcordtoolbox/blob/master/dev/{isct_propseg,isct_dice_coefficient}
+    - name: get spinalcordtoolbox-dev
+      run: |
+        # TODO: get this building, then building in CI, and use the release from there.
+        # These OSF URLs contain a version that hasn't been recompiled since 2016.
+        case "${{ matrix.os }}" in
+          linux)
+            URL="https://osf.io/xspq2/?action=download"
+            ;;
+          osx)
+            URL="https://osf.io/vph5x/?action=download"
+            ;;
+         esac
+        curl -L "$URL" -o spinalcordtoolbox-dev.tar.gz
+        mkdir -p pkg
+        mkdir -p spinalcordtoolbox-dev && tar -zxvf spinalcordtoolbox-dev.tar.gz -C spinalcordtoolbox-dev
+        cp -rp spinalcordtoolbox-dev/* pkg/
+        
+    # upstream: https://www.creatis.insa-lyon.fr/site7/en/ctrDetect
+    - name: get ctrDetect
+      run: |
+        echo "test test trying to build for ${{ matrix.os }}"
+        case "${{ matrix.os }}" in
+          linux)
+            URL="http://www.creatis.insa-lyon.fr/~sdika/soft/ctrDetect-v1_x86_64.tar.gz"
+            ;;
+          osx)
+            URL="http://www.creatis.insa-lyon.fr/~sdika/soft/ctrDetect-v1_macos10.11.tar.gz"
+            ;;
+         esac
+        curl -L "$URL" -o ctrDetect.tar.gz
+        mkdir -p pkg
+        tar -zxvf ctrDetect.tar.gz
+        cp -p ctrDetect/{spine_detect,spine_train_svm} pkg/
+        mv pkg/spine_train_svm pkg/train_svm  # we have this one named unusually
+        mkdir -p pkg/copyright
+        cp -p ctrDetect/LICENSE.txt pkg/copyright/LICENSE_ctrDetect.txt
+        cp -p ctrDetect/LICENSE_opencv.txt pkg/copyright/
+        chmod 544 pkg/copyright/*  # upstream accidentally marked the licenses as programs, oops.
+        
+    - name: "'isct_' prefix"
+      run: |
+        # TODO: there's gotta be a shorter way to do this
+        # add the isct_ to programs that don't already have it
+        cd pkg
+        find ./ -type f -executable ! -name "isct_*" | while read fname; do  mv "$fname" $(dirname "$fname")/isct_$(basename "$fname"); done
+    
+    - name: package
+      run: |
+        # Github Artifacts only make .zips, so make a .tar.gz manually to preserve permissions/dates/etc
+        tar -zcvf spinalcordtoolbox-binaries_${{ matrix.os }}.tar.gz -C pkg ./
+    
+    - name: upload result
+      uses: actions/upload-artifact@v2-preview
+      with:
+        name: spinalcordtoolbox-binaries_${{ matrix.os }}
+        path: spinalcordtoolbox-binaries_${{ matrix.os }}.tar.gz
+
+  release:
+    needs: [build]
+    runs-on: ubuntu-latest
+    #if: github.event_name == 'push' && github.branch_name == 'master' # only do a release on master
+    steps:          
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # name the release with the run_id to allow multiple builds on the same branch/tag
+          # https://github.com/actions/create-release/issues/2#issuecomment-613591846
+          tag_name: ${{ github.ref }}-${{github.run_id }}
+          release_name: Release ${{ github.sha }}
+          draft: false
+          prerelease: true
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: spinalcordtoolbox-binaries_linux
+          
+      - uses: actions/download-artifact@v1
+        with:
+          name: spinalcordtoolbox-binaries_osx
+      
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./spinalcordtoolbox-binaries_linux/spinalcordtoolbox-binaries_linux.tar.gz
+          asset_name: spinalcordtoolbox-binaries_linux.tar.gz
+          asset_content_type: application/gzip
+          
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./spinalcordtoolbox-binaries_osx/spinalcordtoolbox-binaries_osx.tar.gz
+          asset_name: spinalcordtoolbox-binaries_osx.tar.gz
+          asset_content_type: application/gzip
