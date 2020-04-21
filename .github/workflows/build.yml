@@ -44,6 +44,25 @@ jobs:
         mkdir -p spinalcordtoolbox-ants && tar -zxvf spinalcordtoolbox-ants.tar.gz -C spinalcordtoolbox-ants
         mkdir -p pkg && cp -rp spinalcordtoolbox-ants/sct-apps/* pkg/
         find . # DEBUG
+
+    # https://github.com/neuropoly/spinalcordtoolbox/blob/master/dev/{isct_propseg,isct_dice_coefficient}
+    - name: get spinalcordtoolbox-dev
+      run: |
+        # TODO: get this building, then building in CI, and use the release from there.
+        # These OSF URLs contain a version that hasn't been recompiled since 2016.
+        case "${{ matrix.os }}" in
+          linux)
+            URL="https://osf.io/xspq2/?action=download"
+            ;;
+          osx)
+            URL="https://osf.io/vph5x/?action=download"
+            ;;
+         esac
+        curl -L "$URL" -o spinalcordtoolbox-dev.tar.gz
+        mkdir -p pkg
+        mkdir -p spinalcordtoolbox-dev && tar -zxvf spinalcordtoolbox-dev.tar.gz -C spinalcordtoolbox-dev
+        cp -rp spinalcordtoolbox-dev/* pkg/
+        find . # DEBUG
         
     - name: get ctrDetect
       run: |
@@ -61,11 +80,15 @@ jobs:
         tar -zxvf ctrDetect.tar.gz
         cp -p ctrDetect/{spine_detect,spine_train_svm} pkg/
         mv pkg/spine_train_svm pkg/train_svm  # we have this one named unusually
+        mkdir -p pkg/copyright
+        cp -p ctrDetect/LICENSE.txt pkg/copyright/LICENSE_ctrDetect.txt
+        cp -p ctrDetect/LICENSE_opencv.txt pkg/copyright/
         find . # DEBUG
         
     - name: "'isct_' prefix"
       run: |
         # TODO: there's gotta be a shorter way to do this
+        # add the isct_ to files that don't already have it
         cd pkg
         find . -type f ! -name 'isct_*' -printf "%P\n" | while read fname; do echo mv "$fname" isct_"$fname"; done
         find . # DEBUG
