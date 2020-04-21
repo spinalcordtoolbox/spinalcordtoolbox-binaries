@@ -76,6 +76,7 @@ jobs:
         mkdir -p pkg/copyright
         cp -p ctrDetect/LICENSE.txt pkg/copyright/LICENSE_ctrDetect.txt
         cp -p ctrDetect/LICENSE_opencv.txt pkg/copyright/
+        chmod 544 pkg/copyright/*  # upstream accidentally marked the licenses as programs, oops.
         
     - name: "'isct_' prefix"
       run: |
