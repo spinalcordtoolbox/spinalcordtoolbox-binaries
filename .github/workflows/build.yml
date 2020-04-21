@@ -42,6 +42,24 @@ jobs:
          esac
         curl -L "$URL" -o spinalcordtoolbox-ants.tar.gz
         mkdir -p spinalcordtoolbox-ants && tar -zxvf spinalcordtoolbox-ants.tar.gz -C spinalcordtoolbox-ants
-        mkdir -p pkg && cp -rp spinalcordtoolbox-ants/* pkg/
+        mkdir -p pkg && cp -rp spinalcordtoolbox-ants/sct-apps/* pkg/
+        find . # DEBUG
+        
+    - name: "'isct_' prefix"
+      run: |
+        # TODO: there's gotta be a shorter way to do this
+        cd pkg
+        find . -type f ! -name 'isct_*' -printf "%P\n" | while read fname; do echo mv "$fname" isct_"$fname"; done
         find . # DEBUG
     
+    - name: package
+      run: |
+        # Github Artifacts only make .zips, so make a .tar.gz manually to preserve permissions/dates/etc
+        tar -zcvf spinalcordtoolbox-binaries_${{ matrix.os }}.tar.gz -C pkg ./
+        find . # DEBUG
+    
+    - name: upload result
+      uses: actions/upload-artifact@v2-preview
+      with:
+        name: spinalcordtoolbox-binaries_${{ matrix.os }}
+        path: spinalcordtoolbox-binaries_${{ matrix.os }}.tar.g
