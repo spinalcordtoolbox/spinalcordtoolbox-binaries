@@ -14,6 +14,8 @@ on:
 # while making sure they all have the prefix "isct_" on them.
 # TODO: include some checksums; the ctrDetect upstream doesn't even use TLS.
 
+# DEBUG DEBUG DEBUG
+
 jobs:
   build:
     strategy:
