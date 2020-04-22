@@ -28,10 +28,10 @@ jobs:
         # TODO: this is currently at kousu/ANTs; get it moved to neuropoly/ANTs
         case "${{ matrix.os }}" in
           linux)
-            URL="https://github.com/kousu/ANTs/releases/download/refs%2Fpull%2F5%2Fmerge-82250525/sct-apps_centos7.tar.gz"
+            URL="https://github.com/kousu/ANTs/releases/download/refs%2Fpull%2F5%2Fmerge-85059885/sct-apps_centos7.tar.gz"
             ;;
           osx)
-            URL="https://github.com/kousu/ANTs/releases/download/refs%2Fpull%2F5%2Fmerge-82250525/sct-apps_macos-latest.tar.gz"
+            URL="https://github.com/kousu/ANTs/releases/download/refs%2Fpull%2F5%2Fmerge-85059885/sct-apps_macos-latest.tar.gz"
             ;;
          esac
         curl -L "$URL" -o spinalcordtoolbox-ants.tar.gz
