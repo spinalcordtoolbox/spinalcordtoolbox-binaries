@@ -84,7 +84,7 @@ jobs:
         # TODO: there's gotta be a shorter way to do this
         # add the isct_ to programs that don't already have it
         cd pkg
-        find ./ -type f -executable ! -name "isct_*" | while read fname; do  mv "$fname" $(dirname "$fname")/isct_$(basename "$fname"); done
+        find ./ -type f -executable ! -name "isct_*" -maxdepth 1 | while read fname; do  mv "$fname" $(dirname "$fname")/isct_$(basename "$fname"); done
     
     - name: package
       run: |
