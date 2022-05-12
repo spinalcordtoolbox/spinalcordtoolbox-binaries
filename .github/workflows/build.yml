@@ -28,10 +28,10 @@ jobs:
         # TODO: this is currently at kousu/ANTs; get it moved to neuropoly/ANTs
         case "${{ matrix.os }}" in
           linux)
-            URL="https://github.com/kousu/ANTs/releases/download/refs%2Fpull%2F5%2Fmerge-82250525/sct-apps_centos7.tar.gz"
+            URL="https://github.com/spinalcordtoolbox/spinalcordtoolbox-ants/releases/download/r20220511/sct-apps_centos7.tar.gz"
             ;;
           osx)
-            URL="https://github.com/kousu/ANTs/releases/download/refs%2Fpull%2F5%2Fmerge-82250525/sct-apps_macos-latest.tar.gz"
+            URL="https://github.com/spinalcordtoolbox/spinalcordtoolbox-ants/releases/download/r20220511/sct-apps_macos-10.15.tar.gz"
             ;;
          esac
         curl -L "$URL" -o spinalcordtoolbox-ants.tar.gz
@@ -42,13 +42,13 @@ jobs:
     - name: get spinalcordtoolbox-dev
       run: |
         # TODO: get this building, then building in CI, and use the release from there.
-        # These OSF URLs contain a version that hasn't been recompiled since 2016.
+        # These URLs contain a version that hasn't been recompiled since 2016.
         case "${{ matrix.os }}" in
           linux)
-            URL="https://osf.io/xspq2/?action=download"
+            URL="https://github.com/spinalcordtoolbox/spinalcordtoolbox-binaries/releases/download/binaries_dev/20160716_sct_binaries_dev_linux.tar.gz"
             ;;
           osx)
-            URL="https://osf.io/vph5x/?action=download"
+            URL="https://github.com/spinalcordtoolbox/spinalcordtoolbox-binaries/releases/download/binaries_dev/20161123_sct_binaries_dev_osx.tar.gz"
             ;;
          esac
         curl -L "$URL" -o spinalcordtoolbox-dev.tar.gz
