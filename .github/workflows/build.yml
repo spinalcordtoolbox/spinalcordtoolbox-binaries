@@ -28,15 +28,17 @@ jobs:
         # TODO: this is currently at kousu/ANTs; get it moved to neuropoly/ANTs
         case "${{ matrix.os }}" in
           linux)
-            URL="https://github.com/spinalcordtoolbox/spinalcordtoolbox-ants/releases/download/r20220511/sct-apps_centos7.tar.gz"
+            URL="https://github.com/spinalcordtoolbox/spinalcordtoolbox-ants/releases/download/r20220512/sct-apps_centos7.tar.gz"
             ;;
           osx)
-            URL="https://github.com/spinalcordtoolbox/spinalcordtoolbox-ants/releases/download/r20220511/sct-apps_macos-10.15.tar.gz"
+            URL="https://github.com/spinalcordtoolbox/spinalcordtoolbox-ants/releases/download/r20220512/sct-apps_macos-10.15.tar.gz"
             ;;
          esac
         curl -L "$URL" -o spinalcordtoolbox-ants.tar.gz
         mkdir -p spinalcordtoolbox-ants && tar -zxvf spinalcordtoolbox-ants.tar.gz -C spinalcordtoolbox-ants
         mkdir -p pkg && cp -rp spinalcordtoolbox-ants/sct-apps/* pkg/
+        mkdir -p pkg/copyright
+        mv pkg/COPYING.txt pkg/copyright/LICENSE_ANTs.txt
 
     # upstream: https://github.com/neuropoly/spinalcordtoolbox/blob/master/dev/{isct_propseg,isct_dice_coefficient}
     - name: get spinalcordtoolbox-dev
@@ -55,7 +57,7 @@ jobs:
         mkdir -p pkg
         mkdir -p spinalcordtoolbox-dev && tar -zxvf spinalcordtoolbox-dev.tar.gz -C spinalcordtoolbox-dev
         cp -rp spinalcordtoolbox-dev/* pkg/
-        
+
     # upstream: https://www.creatis.insa-lyon.fr/site7/en/ctrDetect
     - name: get ctrDetect
       run: |
@@ -73,7 +75,6 @@ jobs:
         tar -zxvf ctrDetect.tar.gz
         cp -p ctrDetect/{spine_detect,spine_train_svm} pkg/
         mv pkg/spine_train_svm pkg/train_svm  # we have this one named unusually
-        mkdir -p pkg/copyright
         cp -p ctrDetect/LICENSE.txt pkg/copyright/LICENSE_ctrDetect.txt
         cp -p ctrDetect/LICENSE_opencv.txt pkg/copyright/
         chmod 544 pkg/copyright/*  # upstream accidentally marked the licenses as programs, oops.
