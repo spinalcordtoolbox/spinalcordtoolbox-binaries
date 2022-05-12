@@ -9,4 +9,4 @@ This is essentially a metapackage of three packages:
 
 Unlike a traditional metapackage, instead of including links to the contained packages this directly copies them into it. We distribute them together because it simplifies our package manager, `sct_download_data`, to only have to track and know about one big file.
 
-See [.github/workflows/build.yml](.github/workflows/build.yml) for the build script, and the links to update to change the included versions.
+See [.github/workflows/package-binaries.yml](.github/workflows/package-binaries.yml) for the packaging script, and the links to update to change the included versions.

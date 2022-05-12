@@ -1,4 +1,4 @@
-name: build
+name: Package SCT C++ binaries
 
 on:
   push:
