@@ -18,7 +18,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [linux, osx]
+        os: [linux, osx, windows]
     runs-on: ubuntu-latest
     steps:
 
@@ -28,10 +28,13 @@ jobs:
         # TODO: this is currently at kousu/ANTs; get it moved to neuropoly/ANTs
         case "${{ matrix.os }}" in
           linux)
-            URL="https://github.com/spinalcordtoolbox/spinalcordtoolbox-ants/releases/download/r20220512/sct-apps_centos7.tar.gz"
+            URL="https://github.com/spinalcordtoolbox/build_ANTs/releases/download/r20220516/sct-apps_centos7.tar.gz"
             ;;
           osx)
-            URL="https://github.com/spinalcordtoolbox/spinalcordtoolbox-ants/releases/download/r20220512/sct-apps_macos-10.15.tar.gz"
+            URL="https://github.com/spinalcordtoolbox/build_ANTs/releases/download/r20220516/sct-apps_macos-10.15.tar.gz"
+            ;;
+          windows)
+            URL="https://github.com/spinalcordtoolbox/build_ANTs/releases/download/r20220516/sct-apps_windows-2019.tar.gz"
             ;;
          esac
         curl -L "$URL" -o spinalcordtoolbox-ants.tar.gz
@@ -52,6 +55,9 @@ jobs:
           osx)
             URL="https://github.com/spinalcordtoolbox/spinalcordtoolbox-binaries/releases/download/binaries_dev/20161123_sct_binaries_dev_osx.tar.gz"
             ;;
+          windows)
+            URL="https://github.com/spinalcordtoolbox/spinalcordtoolbox-binaries/releases/download/binaries_dev/20220225_sct_binaries_dev_windows.tar.gz"
+            ;;
          esac
         curl -L "$URL" -o spinalcordtoolbox-dev.tar.gz
         mkdir -p pkg
@@ -62,19 +68,31 @@ jobs:
     - name: get ctrDetect
       run: |
         echo "test test trying to build for ${{ matrix.os }}"
+        mkdir -p pkg
         case "${{ matrix.os }}" in
           linux)
             URL="http://www.creatis.insa-lyon.fr/~sdika/soft/ctrDetect-v1_x86_64.tar.gz"
+            curl -L "$URL" -o ctrDetect.tar.gz
+            tar -zxvf ctrDetect.tar.gz
+            cp -p ctrDetect/{spine_detect,spine_train_svm} pkg/
+            mv pkg/spine_train_svm pkg/train_svm  # we have this one named unusually
             ;;
           osx)
             URL="http://www.creatis.insa-lyon.fr/~sdika/soft/ctrDetect-v1_macos10.11.tar.gz"
+            curl -L "$URL" -o ctrDetect.tar.gz
+            tar -zxvf ctrDetect.tar.gz
+            cp -p ctrDetect/{spine_detect,spine_train_svm} pkg/
+            mv pkg/spine_train_svm pkg/train_svm  # we have this one named unusually
+            ;;
+          windows)
+            URL="http://www.creatis.insa-lyon.fr/~sdika/soft/ctrDetect-v1_win.zip"
+            curl -L "$URL" -o ctrDetect.zip
+            unzip ctrDetect.zip
+            mv ctrDetect-win/ ctrDetect
+            cp -p ctrDetect/{spine_detect,spine_train_svm}.exe pkg/
+            mv pkg/spine_train_svm.exe pkg/train_svm.exe  # we have this one named unusually
             ;;
          esac
-        curl -L "$URL" -o ctrDetect.tar.gz
-        mkdir -p pkg
-        tar -zxvf ctrDetect.tar.gz
-        cp -p ctrDetect/{spine_detect,spine_train_svm} pkg/
-        mv pkg/spine_train_svm pkg/train_svm  # we have this one named unusually
         cp -p ctrDetect/LICENSE.txt pkg/copyright/LICENSE_ctrDetect.txt
         cp -p ctrDetect/LICENSE_opencv.txt pkg/copyright/
         chmod 544 pkg/copyright/*  # upstream accidentally marked the licenses as programs, oops.
@@ -122,7 +140,11 @@ jobs:
       - uses: actions/download-artifact@v1
         with:
           name: spinalcordtoolbox-binaries_osx
-      
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: spinalcordtoolbox-binaries_windows
+
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
@@ -141,4 +163,14 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
           asset_path: ./spinalcordtoolbox-binaries_osx/spinalcordtoolbox-binaries_osx.tar.gz
           asset_name: spinalcordtoolbox-binaries_osx.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./spinalcordtoolbox-binaries_windows/spinalcordtoolbox-binaries_windows.tar.gz
+          asset_name: spinalcordtoolbox-binaries_windows.tar.gz
           asset_content_type: application/gzip
