@@ -83,6 +83,7 @@ jobs:
             URL="http://www.creatis.insa-lyon.fr/~sdika/soft/ctrDetect-v1_win.zip"
             curl -L "$URL" -o ctrDetect.zip
             unzip ctrDetect.zip
+            mv ctrDetect-win/ ctrDetect/
             ;;
          esac
         mkdir -p pkg
