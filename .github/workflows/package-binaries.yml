@@ -68,27 +68,31 @@ jobs:
     - name: get ctrDetect
       run: |
         echo "test test trying to build for ${{ matrix.os }}"
+        mkdir -p pkg
         case "${{ matrix.os }}" in
           linux)
             URL="http://www.creatis.insa-lyon.fr/~sdika/soft/ctrDetect-v1_x86_64.tar.gz"
             curl -L "$URL" -o ctrDetect.tar.gz
             tar -zxvf ctrDetect.tar.gz
+            cp -p ctrDetect/{spine_detect,spine_train_svm} pkg/
+            mv pkg/spine_train_svm pkg/train_svm  # we have this one named unusually
             ;;
           osx)
             URL="http://www.creatis.insa-lyon.fr/~sdika/soft/ctrDetect-v1_macos10.11.tar.gz"
             curl -L "$URL" -o ctrDetect.tar.gz
             tar -zxvf ctrDetect.tar.gz
+            cp -p ctrDetect/{spine_detect,spine_train_svm} pkg/
+            mv pkg/spine_train_svm pkg/train_svm  # we have this one named unusually
             ;;
           windows)
             URL="http://www.creatis.insa-lyon.fr/~sdika/soft/ctrDetect-v1_win.zip"
             curl -L "$URL" -o ctrDetect.zip
             unzip ctrDetect.zip
-            mv ctrDetect-win/ ctrDetect/
+            mv ctrDetect-win/ ctrDetect
+            cp -p ctrDetect/{spine_detect,spine_train_svm}.exe pkg/
+            mv pkg/spine_train_svm.exe pkg/train_svm.exe  # we have this one named unusually
             ;;
          esac
-        mkdir -p pkg
-        cp -p ctrDetect/{spine_detect,spine_train_svm}* pkg/
-        mv pkg/spine_train_svm pkg/train_svm  # we have this one named unusually
         cp -p ctrDetect/LICENSE.txt pkg/copyright/LICENSE_ctrDetect.txt
         cp -p ctrDetect/LICENSE_opencv.txt pkg/copyright/
         chmod 544 pkg/copyright/*  # upstream accidentally marked the licenses as programs, oops.
