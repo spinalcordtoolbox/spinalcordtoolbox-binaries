@@ -18,7 +18,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [linux, osx]
+        os: [linux, osx, windows]
     runs-on: ubuntu-latest
     steps:
 
@@ -32,6 +32,9 @@ jobs:
             ;;
           osx)
             URL="https://github.com/spinalcordtoolbox/build_ANTs/releases/download/r20220516/sct-apps_macos-10.15.tar.gz"
+            ;;
+          windows)
+            URL="https://github.com/spinalcordtoolbox/build_ANTs/releases/download/r20220516/sct-apps_windows-2019.tar.gz"
             ;;
          esac
         curl -L "$URL" -o spinalcordtoolbox-ants.tar.gz
@@ -52,6 +55,9 @@ jobs:
           osx)
             URL="https://github.com/spinalcordtoolbox/spinalcordtoolbox-binaries/releases/download/binaries_dev/20161123_sct_binaries_dev_osx.tar.gz"
             ;;
+          windows)
+            URL="https://github.com/spinalcordtoolbox/spinalcordtoolbox-binaries/releases/download/binaries_dev/20220225_sct_binaries_dev_windows.tar.gz"
+            ;;
          esac
         curl -L "$URL" -o spinalcordtoolbox-dev.tar.gz
         mkdir -p pkg
@@ -69,11 +75,14 @@ jobs:
           osx)
             URL="http://www.creatis.insa-lyon.fr/~sdika/soft/ctrDetect-v1_macos10.11.tar.gz"
             ;;
+          windows)
+            URL="http://www.creatis.insa-lyon.fr/~sdika/soft/ctrDetect-v1_win.zip"
+            ;;
          esac
         curl -L "$URL" -o ctrDetect.tar.gz
         mkdir -p pkg
         tar -zxvf ctrDetect.tar.gz
-        cp -p ctrDetect/{spine_detect,spine_train_svm} pkg/
+        cp -p ctrDetect/{spine_detect,spine_train_svm}* pkg/
         mv pkg/spine_train_svm pkg/train_svm  # we have this one named unusually
         cp -p ctrDetect/LICENSE.txt pkg/copyright/LICENSE_ctrDetect.txt
         cp -p ctrDetect/LICENSE_opencv.txt pkg/copyright/
