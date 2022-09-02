@@ -42,6 +42,25 @@ jobs:
         mkdir -p pkg && cp -rp spinalcordtoolbox-ants/sct-apps/* pkg/
         mkdir -p pkg/copyright
         mv pkg/COPYING.txt pkg/copyright/LICENSE_ANTs.txt
+        
+  
+    # upstream: hhttps://github.com/biomedia-mira/stitching
+    - name: get stitching
+      run: |
+        case "${{ matrix.os }}" in
+          linux)
+            URL="https://github.com/jqmcginnis/build_biomedia_stitching/releases/download/untagged-633501514015af8e9f25/stitching_ubuntu-18.04tar.gz"
+            ;;
+          osx)
+            URL="https://github.com/jqmcginnis/build_biomedia_stitching/releases/download/untagged-633501514015af8e9f25/stitching_macos-10.15.tar.gz"
+            ;;
+          windows)
+            URL="https://github.com/jqmcginnis/build_biomedia_stitching/releases/download/untagged-633501514015af8e9f25/stitching_windows-2019.tar.gz"
+            ;;
+         esac
+        curl -L "$URL" -o stitching.tar.gz
+        mkdir -p stitching && tar -zxvf stitching.tar.gz -C stitching
+        mkdir -p pkg && cp -rp stitching/archive/* pkg/
 
     # upstream: https://github.com/neuropoly/spinalcordtoolbox/blob/master/dev/{isct_propseg,isct_dice_coefficient}
     - name: get spinalcordtoolbox-dev
