@@ -49,13 +49,13 @@ jobs:
       run: |
         case "${{ matrix.os }}" in
           linux)
-            URL="https://github.com/jqmcginnis/build_biomedia_stitching/releases/download/untagged-633501514015af8e9f25/stitching_ubuntu-18.04.tar.gz"
+            URL="https://github.com/jqmcginnis/build_biomedia_stitching/releases/download/refs%2Fpull%2F1%2Fmerge-2981338722/stitching_ubuntu-18.04.tar.gz"
             ;;
           osx)
-            URL="https://github.com/jqmcginnis/build_biomedia_stitching/releases/download/untagged-633501514015af8e9f25/stitching_macos-10.15.tar.gz"
+            URL="https://github.com/jqmcginnis/build_biomedia_stitching/releases/download/refs%2Fpull%2F1%2Fmerge-2981338722/stitching_macos-10.15.tar.gz"
             ;;
           windows)
-            URL="https://github.com/jqmcginnis/build_biomedia_stitching/releases/download/untagged-633501514015af8e9f25/stitching_windows-2019.tar.gz"
+            URL="https://github.com/jqmcginnis/build_biomedia_stitching/releases/download/refs%2Fpull%2F1%2Fmerge-2981338722/stitching_windows-2019.tar.gz"
             ;;
          esac
         curl -L "$URL" -o stitching.tar.gz
