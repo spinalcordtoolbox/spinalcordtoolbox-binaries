@@ -49,7 +49,7 @@ jobs:
       run: |
         case "${{ matrix.os }}" in
           linux)
-            URL="https://github.com/spinalcordtoolbox/build_biomedia_stitching/releases/download/r20221018/stitching_centos-7.zip"
+            URL="https://github.com/spinalcordtoolbox/build_biomedia_stitching/releases/download/r20221018/stitching_centos-7.tar.gz"
             ;;
           osx)
             URL="https://github.com/spinalcordtoolbox/build_biomedia_stitching/releases/download/r20221018/stitching_macos-10.15.tar.gz"
