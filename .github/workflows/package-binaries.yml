@@ -129,7 +129,7 @@ jobs:
         tar -zcvf spinalcordtoolbox-binaries_${{ matrix.os }}.tar.gz -C pkg ./
     
     - name: upload result
-      uses: actions/upload-artifact@v2-preview
+      uses: actions/upload-artifact@v3
       with:
         name: spinalcordtoolbox-binaries_${{ matrix.os }}
         path: spinalcordtoolbox-binaries_${{ matrix.os }}.tar.gz
