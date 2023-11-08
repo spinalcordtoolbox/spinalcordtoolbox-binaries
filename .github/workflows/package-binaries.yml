@@ -152,15 +152,15 @@ jobs:
           draft: false
           prerelease: true
 
-      - uses: actions/download-artifact@v1
+      - uses: actions/download-artifact@v3
         with:
           name: spinalcordtoolbox-binaries_linux
-          
-      - uses: actions/download-artifact@v1
+
+      - uses: actions/download-artifact@v3
         with:
           name: spinalcordtoolbox-binaries_osx
 
-      - uses: actions/download-artifact@v1
+      - uses: actions/download-artifact@v3
         with:
           name: spinalcordtoolbox-binaries_windows
 
@@ -170,17 +170,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./spinalcordtoolbox-binaries_linux/spinalcordtoolbox-binaries_linux.tar.gz
+          asset_path: ./spinalcordtoolbox-binaries_linux.tar.gz
           asset_name: spinalcordtoolbox-binaries_linux.tar.gz
           asset_content_type: application/gzip
-          
+
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./spinalcordtoolbox-binaries_osx/spinalcordtoolbox-binaries_osx.tar.gz
+          asset_path: ./spinalcordtoolbox-binaries_osx.tar.gz
           asset_name: spinalcordtoolbox-binaries_osx.tar.gz
           asset_content_type: application/gzip
 
@@ -190,6 +190,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./spinalcordtoolbox-binaries_windows/spinalcordtoolbox-binaries_windows.tar.gz
+          asset_path: ./spinalcordtoolbox-binaries_windows.tar.gz
           asset_name: spinalcordtoolbox-binaries_windows.tar.gz
           asset_content_type: application/gzip
