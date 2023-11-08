@@ -114,7 +114,7 @@ jobs:
          esac
         cp -p ctrDetect/LICENSE.txt pkg/copyright/LICENSE_ctrDetect.txt
         cp -p ctrDetect/LICENSE_opencv.txt pkg/copyright/
-        chmod 666 pkg/copyright/*  # upstream accidentally marked the licenses as programs, oops.
+        chmod -x pkg/copyright/*  # upstream accidentally marked the licenses as programs, oops.
         
     - name: "'isct_' prefix"
       run: |
