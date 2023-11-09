@@ -139,7 +139,8 @@ jobs:
   release:
     needs: [build]
     runs-on: ubuntu-latest
-    #if: github.event_name == 'push' && github.branch_name == 'master' # only do a release on master
+    # Only attach to release if workflow is run manually. (This allows the workflow to double as a PR test.)
+    if: github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/download-artifact@v3
         with:
