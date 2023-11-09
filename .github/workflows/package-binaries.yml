@@ -160,7 +160,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.event.inputs.release_title }}
           name: Release ${{ github.sha }}
-          draft: false
-          prerelease: true
+          draft: true
           artifacts: "spinalcordtoolbox-binaries_linux.tar.gz,spinalcordtoolbox-binaries_osx.tar.gz,spinalcordtoolbox-binaries_windows.tar.gz"
           artifactContentType: application/gzip
