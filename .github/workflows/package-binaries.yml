@@ -1,10 +1,12 @@
 name: Package SCT C++ binaries
 
 on:
-  push:
-    branches: [ master ]
   pull_request:
-    branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      release_title:
+        description: 'Release title (e.g. rYYYYMMDD)'
+        required: true
 
 # all this does is collect three dependencies,
 # - spinalcordtoolbox-ants which essentially a more minimal fork of https://github.com/ANTsX/ANTs
@@ -155,9 +157,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          # name the release with the run_id to allow multiple builds on the same branch/tag
-          # https://github.com/actions/create-release/issues/2#issuecomment-613591846
-          tag: ${{ github.ref }}-${{github.run_id }}
+          tag: ${{ github.event.inputs.release_title }}
           name: Release ${{ github.sha }}
           draft: false
           prerelease: true
