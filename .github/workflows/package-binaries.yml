@@ -1,11 +1,13 @@
 name: Package SCT C++ binaries
 
 on:
-  push:
-    branches: [ master ]
   pull_request:
-    branches: [ master ]
-    
+  workflow_dispatch:
+    inputs:
+      release_title:
+        description: 'Release title (e.g. rYYYYMMDD)'
+        required: true
+
 # all this does is collect three dependencies,
 # - spinalcordtoolbox-ants which essentially a more minimal fork of https://github.com/ANTsX/ANTs
 # - spinalcordtoolbox-dev, which comes from https://github.com/neuropoly/spinalcordtoolbox/blob/master/dev
@@ -42,8 +44,8 @@ jobs:
         mkdir -p pkg && cp -rp spinalcordtoolbox-ants/sct-apps/* pkg/
         mkdir -p pkg/copyright
         mv pkg/COPYING.txt pkg/copyright/LICENSE_ANTs.txt
-        
-  
+
+
     # upstream: hhttps://github.com/biomedia-mira/stitching
     - name: get stitching
       run: |
@@ -114,22 +116,22 @@ jobs:
          esac
         cp -p ctrDetect/LICENSE.txt pkg/copyright/LICENSE_ctrDetect.txt
         cp -p ctrDetect/LICENSE_opencv.txt pkg/copyright/
-        chmod 666 pkg/copyright/*  # upstream accidentally marked the licenses as programs, oops.
-        
+        chmod -x pkg/copyright/*  # upstream accidentally marked the licenses as programs, oops.
+
     - name: "'isct_' prefix"
       run: |
         # TODO: there's gotta be a shorter way to do this
         # add the isct_ to programs that don't already have it
         cd pkg
         find ./ -type f -executable ! -name "isct_*" -maxdepth 1 | while read fname; do  mv "$fname" $(dirname "$fname")/isct_$(basename "$fname"); done
-    
+
     - name: package
       run: |
         # Github Artifacts only make .zips, so make a .tar.gz manually to preserve permissions/dates/etc
         tar -zcvf spinalcordtoolbox-binaries_${{ matrix.os }}.tar.gz -C pkg ./
-    
+
     - name: upload result
-      uses: actions/upload-artifact@v2-preview
+      uses: actions/upload-artifact@v3
       with:
         name: spinalcordtoolbox-binaries_${{ matrix.os }}
         path: spinalcordtoolbox-binaries_${{ matrix.os }}.tar.gz
@@ -137,59 +139,27 @@ jobs:
   release:
     needs: [build]
     runs-on: ubuntu-latest
-    #if: github.event_name == 'push' && github.branch_name == 'master' # only do a release on master
-    steps:          
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          # name the release with the run_id to allow multiple builds on the same branch/tag
-          # https://github.com/actions/create-release/issues/2#issuecomment-613591846
-          tag_name: ${{ github.ref }}-${{github.run_id }}
-          release_name: Release ${{ github.sha }}
-          draft: false
-          prerelease: true
-
-      - uses: actions/download-artifact@v1
+    # Only attach to release if workflow is run manually. (This allows the workflow to double as a PR test.)
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/download-artifact@v3
         with:
           name: spinalcordtoolbox-binaries_linux
-          
-      - uses: actions/download-artifact@v1
+
+      - uses: actions/download-artifact@v3
         with:
           name: spinalcordtoolbox-binaries_osx
 
-      - uses: actions/download-artifact@v1
+      - uses: actions/download-artifact@v3
         with:
           name: spinalcordtoolbox-binaries_windows
 
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        uses: ncipollo/release-action@v1
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./spinalcordtoolbox-binaries_linux/spinalcordtoolbox-binaries_linux.tar.gz
-          asset_name: spinalcordtoolbox-binaries_linux.tar.gz
-          asset_content_type: application/gzip
-          
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./spinalcordtoolbox-binaries_osx/spinalcordtoolbox-binaries_osx.tar.gz
-          asset_name: spinalcordtoolbox-binaries_osx.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./spinalcordtoolbox-binaries_windows/spinalcordtoolbox-binaries_windows.tar.gz
-          asset_name: spinalcordtoolbox-binaries_windows.tar.gz
-          asset_content_type: application/gzip
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.event.inputs.release_title }}
+          name: Release ${{ github.sha }}
+          draft: true
+          artifacts: "spinalcordtoolbox-binaries_linux.tar.gz,spinalcordtoolbox-binaries_osx.tar.gz,spinalcordtoolbox-binaries_windows.tar.gz"
+          artifactContentType: application/gzip
