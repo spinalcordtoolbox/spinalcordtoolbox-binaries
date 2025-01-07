@@ -30,13 +30,13 @@ jobs:
         # TODO: this is currently at kousu/ANTs; get it moved to neuropoly/ANTs
         case "${{ matrix.os }}" in
           linux)
-            URL="https://github.com/spinalcordtoolbox/build_ANTs/releases/download/r20220516-2/sct-apps_centos7.tar.gz"
+            URL="https://github.com/spinalcordtoolbox/build_ANTs/releases/download/r20250107/sct-apps_centos-8.tar.gz"
             ;;
           osx)
-            URL="https://github.com/spinalcordtoolbox/build_ANTs/releases/download/r20220516-2/sct-apps_macos-10.15.tar.gz"
+            URL="https://github.com/spinalcordtoolbox/build_ANTs/releases/download/r20250107/sct-apps_macos-latest.tar.gz"
             ;;
           windows)
-            URL="https://github.com/spinalcordtoolbox/build_ANTs/releases/download/r20220516-2/sct-apps_windows-2019.tar.gz"
+            URL="https://github.com/spinalcordtoolbox/build_ANTs/releases/download/r20250107/sct-apps_windows-latest.tar.gz"
             ;;
          esac
         curl -L "$URL" -o spinalcordtoolbox-ants.tar.gz
