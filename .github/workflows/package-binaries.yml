@@ -30,13 +30,13 @@ jobs:
         # TODO: this is currently at kousu/ANTs; get it moved to neuropoly/ANTs
         case "${{ matrix.os }}" in
           linux)
-            URL="https://github.com/spinalcordtoolbox/build_ANTs/releases/download/r20220516-2/sct-apps_centos7.tar.gz"
+            URL="https://github.com/spinalcordtoolbox/build_ANTs/releases/download/r20250109/sct-apps_centos-8.tar.gz"
             ;;
           osx)
-            URL="https://github.com/spinalcordtoolbox/build_ANTs/releases/download/r20220516-2/sct-apps_macos-10.15.tar.gz"
+            URL="https://github.com/spinalcordtoolbox/build_ANTs/releases/download/r20250109/sct-apps_macos-latest.tar.gz"
             ;;
           windows)
-            URL="https://github.com/spinalcordtoolbox/build_ANTs/releases/download/r20220516-2/sct-apps_windows-2019.tar.gz"
+            URL="https://github.com/spinalcordtoolbox/build_ANTs/releases/download/r20250109/sct-apps_windows-latest.tar.gz"
             ;;
          esac
         curl -L "$URL" -o spinalcordtoolbox-ants.tar.gz
@@ -131,7 +131,7 @@ jobs:
         tar -zcvf spinalcordtoolbox-binaries_${{ matrix.os }}.tar.gz -C pkg ./
 
     - name: upload result
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: spinalcordtoolbox-binaries_${{ matrix.os }}
         path: spinalcordtoolbox-binaries_${{ matrix.os }}.tar.gz
@@ -142,15 +142,15 @@ jobs:
     # Only attach to release if workflow is run manually. (This allows the workflow to double as a PR test.)
     if: github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: spinalcordtoolbox-binaries_linux
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: spinalcordtoolbox-binaries_osx
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: spinalcordtoolbox-binaries_windows
 
